@@ -29,4 +29,65 @@ for (let char of a) {
 <h2>Internal with line break</h2>
 <p>What happens <ac:link ac:card-appearance="inline"><ri:page ri:content-title="Other Page" /><ac:link-body>if link description contains
 a line break</ac:link-body></ac:link>?</p>
+<h2>With tables</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Role</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alice</td>
+<td>Developer</td>
+<td>New York</td>
+</tr>
+<tr>
+<td>Bob</td>
+<td>Designer</td>
+<td>Los Angeles</td>
+</tr>
+</tbody>
+</table>
+<h3>Table with alignment</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Left</th>
+<th style="text-align:center">Center</th>
+<th style="text-align:right">Right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">L1</td>
+<td style="text-align:center">C1</td>
+<td style="text-align:right">R1</td>
+</tr>
+<tr>
+<td style="text-align:left">L2</td>
+<td style="text-align:center">C2</td>
+<td style="text-align:right">R2</td>
+</tr>
+</tbody>
+</table>
+<h2>With admonitions</h2>
+<ac:structured-macro ac:name="note"><ac:parameter ac:name="title">Note</ac:parameter><ac:rich-text-body><p>This is a note admonition with <strong>bold</strong> text.</p>
+</ac:rich-text-body></ac:structured-macro><ac:structured-macro ac:name="warning"><ac:parameter ac:name="title">Custom Warning Title</ac:parameter><ac:rich-text-body><p>This is a warning with a custom title.</p>
+</ac:rich-text-body></ac:structured-macro><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This tip has no title.</p>
+</ac:rich-text-body></ac:structured-macro><h3>Collapsible admonitions</h3>
+<ac:structured-macro ac:name="expand"><ac:parameter ac:name="title">Click to expand</ac:parameter><ac:rich-text-body><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This content is collapsed by default.</p>
+</ac:rich-text-body></ac:structured-macro></ac:rich-text-body></ac:structured-macro><ac:structured-macro ac:name="expand"><ac:parameter ac:name="title">Info</ac:parameter><ac:rich-text-body><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This content is expanded by default.</p>
+</ac:rich-text-body></ac:structured-macro></ac:rich-text-body></ac:structured-macro><h2>Code blocks with attributes</h2>
+<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">python</ac:parameter><ac:parameter ac:name="title">main.py</ac:parameter><ac:plain-text-body><![CDATA[def hello():
+    print("Hello, World!")]]></ac:plain-text-body></ac:structured-macro>
+<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">js</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:plain-text-body><![CDATA[const x = 1;
+const y = 2;]]></ac:plain-text-body></ac:structured-macro>
+<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">yaml</ac:parameter><ac:parameter ac:name="title">config.yml</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="firstline">5</ac:parameter><ac:plain-text-body><![CDATA[server:
+  port: 8080
+  host: localhost]]></ac:plain-text-body></ac:structured-macro>
+<h2>Images with dimensions</h2>
+<p><ac:image ac:alt="sized image" ac:width="300"><ri:attachment ri:filename="img-1.png" /></ac:image></p>
 <hr /><p style="text-align: right;"><a href="https://github.com/account/repo/blob/branch-name/test/fixtures/markdown/full.md">Edit on GitHub</a> ✍️</p>

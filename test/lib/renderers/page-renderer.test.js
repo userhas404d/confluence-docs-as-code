@@ -50,6 +50,7 @@ describe('renderers/page-render', () => {
                         new Image(imageFile, 'img1'),
                         new Graph(mmdFile, 'mermaid', 'kroki', 'graph_2'),
                         new Graph(pumlFile, 'plantuml', 'kroki', 'graph_3'),
+                        new Image(imageFile, 'sized image', { width: '300' }),
                     ];
                     const expectedHtml = readFileSync(htmlFile, 'utf8');
                     const renderedPage = renderer.render(page);
@@ -75,6 +76,7 @@ describe('renderers/page-render', () => {
                             new Image(imageFile, 'img1'),
                             new Graph(mmdFile, 'mermaid', 'mermaid-plugin', 'graph_2'),
                             new Graph(pumlFile, 'plantuml', 'plantuml', 'graph_3'),
+                            new Image(imageFile, 'sized image', { width: '300' }),
                         ];
                         const expectedHtml = readFileSync(htmlFile, 'utf8');
                         const renderedPage = renderer.render(page);
@@ -95,7 +97,8 @@ describe('renderers/page-render', () => {
                 const htmlFile = path.resolve(fixturesPath, 'kroki-disabled.html');
                 it('should render the markdown to html and return only image references', () => {
                     const expectedAttachments = [
-                        new Image(imageFile, 'img1')
+                        new Image(imageFile, 'img1'),
+                        new Image(imageFile, 'sized image', { width: '300' }),
                     ];
                     const expectedHtml = readFileSync(htmlFile, 'utf8');
                     const renderedPage = renderer.render(page);

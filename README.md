@@ -11,6 +11,7 @@ Atlassian Confluence Cloud wiki.
 * Converts internal links to Confluence links
 * Uploads images as Confluence page attachments
 * Converts fenced code blocks to Confluence code macros
+* Supports [MkDocs Material extensions](#mkdocs-material-extensions) (admonitions, code block attributes, image dimensions, tables)
 * Renders graphs:
   * *Mermaid* see [`mermaid_renderer`](#mermaid_renderer) for available options
   * *PlantUML* see [`plantuml_renderer`](#plantuml_renderer) for available options
@@ -161,6 +162,89 @@ Defaults to https://kroki.io
 
 > ⚠️ If not explicitly defined, falls back to [`kroki_enabled`](#kroki_enabled-deprecated)
 > option in order to provide backwards compatibility
+
+## MkDocs Material Extensions
+
+This action supports several [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) conventions, converting them to native Confluence macros.
+
+### Admonitions
+
+[MkDocs Material admonitions](https://squidfunk.github.io/mkdocs-material/reference/admonitions/) are converted to Confluence panel macros:
+
+```markdown
+!!! note
+    This is a note admonition.
+
+!!! warning "Custom Title"
+    This warning has a custom title.
+
+!!! tip ""
+    This tip has no title.
+```
+
+**Type mapping to Confluence panels:**
+
+| MkDocs Material Type                           | Confluence Panel |
+|------------------------------------------------|------------------|
+| `note`                                         | Note             |
+| `tip`, `hint`, `important`                     | Tip              |
+| `warning`, `caution`, `attention`, `danger`, `error` | Warning    |
+| `info`, `abstract`, `success`, `question`, `example`, `quote` | Info |
+| `bug`, `failure`, `fail`, `missing`            | Warning          |
+
+**Collapsible admonitions** (`???` / `???+`) are wrapped in a Confluence expand macro:
+
+```markdown
+??? note "Click to expand"
+    This content is hidden by default.
+
+???+ tip "Expanded by default"
+    This content starts visible.
+```
+
+### Code Block Attributes
+
+Fenced code blocks support `title` and `linenums` attributes:
+
+```markdown
+ ```python title="main.py"
+ print("hello")
+ ```
+
+ ```javascript linenums="1"
+ console.log("hello");
+ ```
+
+ ```yaml title="config.yml" linenums="5"
+ key: value
+ ```
+```
+
+- `title` adds a title to the Confluence code macro
+- `linenums` enables line numbers; values greater than 1 set the starting line number
+
+### Image Dimensions
+
+Images support MkDocs Material dimension syntax:
+
+```markdown
+![Alt text](image.png){ width="300" }
+![Alt text](image.png){ width="300" height="200" }
+```
+
+Dimensions are applied as `ac:width` and `ac:height` attributes on the Confluence image macro.
+
+### Tables
+
+Standard [GitHub Flavored Markdown (GFM) tables](https://github.github.com/gfm/#tables-extension-) are supported and rendered as HTML tables in Confluence:
+
+```markdown
+| Header 1 | Header 2 | Header 3 |
+|----------|----------|----------|
+| Cell 1   | Cell 2   | Cell 3   |
+```
+
+Column alignment (`:---`, `:---:`, `---:`) is preserved.
 
 ## Example usage
 
