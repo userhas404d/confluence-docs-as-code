@@ -1,21 +1,26 @@
 import sinon from 'sinon';
-import core from '@actions/core';
-import logger from '../../lib/logger.js';
+import esmock from 'esmock';
 
 const sandbox = sinon.createSandbox();
 
 describe('logger', () => {
+    let logger;
     let coreSpy;
-    beforeEach(() => {
+    beforeEach(async () => {
         coreSpy = {
-            info: sandbox.stub(core, 'info'),
-            error: sandbox.stub(core, 'error'),
-            warning: sandbox.stub(core, 'warning'),
-            notice: sandbox.stub(core, 'notice'),
-            debug: sandbox.stub(core, 'debug'),
-            isDebug: sandbox.stub(core, 'isDebug'),
-            setFailed: sandbox.stub(core, 'setFailed')
+            info: sandbox.stub(),
+            error: sandbox.stub(),
+            warning: sandbox.stub(),
+            notice: sandbox.stub(),
+            debug: sandbox.stub(),
+            isDebug: sandbox.stub(),
+            setFailed: sandbox.stub(),
+            summary: {}
         };
+        logger = await esmock('../../lib/logger.js', {
+            '@actions/core': coreSpy
+        });
+        logger = logger.default;
     });
     afterEach(() => {
         sandbox.restore();

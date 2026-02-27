@@ -7,7 +7,7 @@
     "posttest": "eslint ./lib/**/*.js",
     "test": "c8 mocha",
     "build": "ncc build lib/index.js --license licenses.txt --minify --source-map",
-    "prepare": "husky install",
+    "prepare": "husky",
     "predocs:generate": " rm -rf ./docs",
     "docs:generate": "jsdoc --readme ./README.md -c jsdoc.json"
   },
@@ -21,29 +21,32 @@
     "node": "20.19.5"
   },
   "dependencies": {
-    "@actions/core": "^1.10.0",
+    "@actions/core": "^3.0.0",
     "axios": "^1.6.0",
-    "axios-retry": "^3.4.0",
+    "axios-retry": "^4.5.0",
     "form-data": "^4.0.0",
     "markdown-it": "^14.1.1",
     "plantuml-encoder": "^1.4.0",
     "yaml": "^2.2.2"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.36.0",
-    "axios-mock-adapter": "^1.21.2",
-    "c8": "^7.12.0",
-    "chai": "^4.3.6",
-    "chai-as-promised": "^7.1.1",
+    "@eslint/js": "^10.0.1",
+    "@vercel/ncc": "^0.38.4",
+    "axios-mock-adapter": "^2.1.0",
+    "c8": "^11.0.0",
+    "chai": "^6.2.2",
+    "chai-as-promised": "^8.0.2",
     "clean-jsdoc-theme": "^4.2.6",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.29.0",
-    "husky": "^8.0.3",
+    "dotenv": "^17.3.1",
+    "eslint": "^10.0.2",
+    "esmock": "^2.7.3",
+    "globals": "^17.3.0",
+    "husky": "^9.1.7",
     "jsdoc": "^4.0.2",
-    "lint-staged": "^13.1.0",
-    "mocha": "^10.1.0",
-    "nock": "^13.2.9",
-    "sinon": "^14.0.1"
+    "lint-staged": "^16.2.7",
+    "mocha": "^11.7.5",
+    "nock": "^14.0.11",
+    "sinon": "^21.0.1"
   },
   "lint-staged": {
     "lib/**/*.js": [

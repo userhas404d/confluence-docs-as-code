@@ -1,4 +1,5 @@
 {
     "recursive": true,
-    "file": "test/index.js"
+    "file": "test/index.js",
+    "node-option": ["loader=esmock"]
 }
