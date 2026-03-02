@@ -121,4 +121,32 @@ describe('pull-config', () => {
             expect(() => parsePullConfig([], env)).to.throw(/https:\/\//i);
         });
     });
+
+    describe('--force flag', () => {
+        it('should default force to false', () => {
+            const config = parsePullConfig([], validEnv);
+            expect(config.force).to.equal(false);
+        });
+
+        it('should accept --force CLI flag', () => {
+            const args = ['--force'];
+            const config = parsePullConfig(args, validEnv);
+            expect(config.force).to.equal(true);
+        });
+
+        it('should accept CONFLUENCE_FORCE_PULL env var', () => {
+            const config = parsePullConfig([], { ...validEnv, CONFLUENCE_FORCE_PULL: 'true' });
+            expect(config.force).to.equal(true);
+        });
+
+        it('should not set force when CONFLUENCE_FORCE_PULL is not "true"', () => {
+            const config = parsePullConfig([], { ...validEnv, CONFLUENCE_FORCE_PULL: 'false' });
+            expect(config.force).to.equal(false);
+        });
+
+        it('should prefer CLI --force over env var', () => {
+            const config = parsePullConfig(['--force'], { ...validEnv, CONFLUENCE_FORCE_PULL: 'false' });
+            expect(config.force).to.equal(true);
+        });
+    });
 });

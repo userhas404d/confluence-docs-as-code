@@ -15,6 +15,7 @@ describe('tree-walker', () => {
                 id: '100',
                 title: 'Root Page',
                 position: 0,
+                version: { number: 3 },
                 body: { atlas_doc_format: { value: '{"version":1,"type":"doc","content":[]}' } }
             }),
             getPageChildren: sinon.stub().resolves([])
@@ -23,6 +24,7 @@ describe('tree-walker', () => {
         const tree = await walkTree(sdk, '100');
         expect(tree.id).to.equal('100');
         expect(tree.title).to.equal('Root Page');
+        expect(tree.version).to.equal(3);
         expect(tree.depth).to.equal(0);
         expect(tree.parentId).to.be.null;
         expect(tree.slug).to.equal('index');
@@ -38,7 +40,7 @@ describe('tree-walker', () => {
 
         // Root page
         sdk.getPageBody.withArgs('100').resolves({
-            id: '100', title: 'Root', position: 0,
+            id: '100', title: 'Root', position: 0, version: { number: 1 },
             body: { atlas_doc_format: { value: '{}' } }
         });
         sdk.getPageChildren.withArgs('100').resolves([
@@ -47,7 +49,7 @@ describe('tree-walker', () => {
 
         // Level 1 child
         sdk.getPageBody.withArgs('200').resolves({
-            id: '200', title: 'Architecture', position: 0,
+            id: '200', title: 'Architecture', position: 0, version: { number: 2 },
             body: { atlas_doc_format: { value: '{}' } }
         });
         sdk.getPageChildren.withArgs('200').resolves([
@@ -56,7 +58,7 @@ describe('tree-walker', () => {
 
         // Level 2 child (leaf)
         sdk.getPageBody.withArgs('300').resolves({
-            id: '300', title: 'System Design', position: 0,
+            id: '300', title: 'System Design', position: 0, version: { number: 1 },
             body: { atlas_doc_format: { value: '{}' } }
         });
         sdk.getPageChildren.withArgs('300').resolves([]);
@@ -77,7 +79,7 @@ describe('tree-walker', () => {
         };
 
         sdk.getPageBody.withArgs('100').resolves({
-            id: '100', title: 'Root', position: 0,
+            id: '100', title: 'Root', position: 0, version: { number: 1 },
             body: { atlas_doc_format: { value: '{}' } }
         });
         sdk.getPageChildren.withArgs('100').resolves([
@@ -87,21 +89,21 @@ describe('tree-walker', () => {
 
         // Getting Started = leaf (no children)
         sdk.getPageBody.withArgs('200').resolves({
-            id: '200', title: 'Getting Started', position: 0,
+            id: '200', title: 'Getting Started', position: 0, version: { number: 1 },
             body: { atlas_doc_format: { value: '{}' } }
         });
         sdk.getPageChildren.withArgs('200').resolves([]);
 
         // Architecture = section parent (has children)
         sdk.getPageBody.withArgs('201').resolves({
-            id: '201', title: 'Architecture', position: 1,
+            id: '201', title: 'Architecture', position: 1, version: { number: 3 },
             body: { atlas_doc_format: { value: '{}' } }
         });
         sdk.getPageChildren.withArgs('201').resolves([
             { id: '300', title: 'System Design', type: 'page', childPosition: 0 }
         ]);
         sdk.getPageBody.withArgs('300').resolves({
-            id: '300', title: 'System Design', position: 0,
+            id: '300', title: 'System Design', position: 0, version: { number: 1 },
             body: { atlas_doc_format: { value: '{}' } }
         });
         sdk.getPageChildren.withArgs('300').resolves([]);
@@ -121,7 +123,7 @@ describe('tree-walker', () => {
     it('should handle pages with empty children', async () => {
         const sdk = {
             getPageBody: sinon.stub().resolves({
-                id: '100', title: 'Root', position: 0,
+                id: '100', title: 'Root', position: 0, version: { number: 1 },
                 body: { atlas_doc_format: { value: '{}' } }
             }),
             getPageChildren: sinon.stub().resolves([])

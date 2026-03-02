@@ -22,6 +22,83 @@ Atlassian Confluence Cloud wiki.
 
 * Does not publish pages not described in the `nav` section.
 
+## Pull Mode (Confluence → MkDocs)
+
+In addition to the push-to-Confluence GitHub Action, this tool includes a **pull mode** that
+exports a Confluence page tree into a local MkDocs Material site.
+
+### Quick Start
+
+```bash
+export CONFLUENCE_URL="https://your-tenant.atlassian.net"
+export CONFLUENCE_USER="you@example.com"
+export CONFLUENCE_TOKEN="your-api-token"
+export CONFLUENCE_ROOT_ID="123456789"    # Any Confluence page ID
+
+node lib/pull/index.js --output-dir ./output
+
+cd output
+pip install mkdocs-material
+mkdocs serve
+```
+
+### CLI Options
+
+| Flag                  | Env Var                | Required | Description                                                    |
+|-----------------------|------------------------|----------|----------------------------------------------------------------|
+| `--confluence-url`    | `CONFLUENCE_URL`       | Yes      | Base URL (e.g., `https://tenant.atlassian.net`)                |
+| `--confluence-user`   | `CONFLUENCE_USER`      | Yes      | Confluence user email for Basic auth                           |
+| `--confluence-token`  | `CONFLUENCE_TOKEN`     | Yes      | Confluence API token                                           |
+| `--root-page-id`      | `CONFLUENCE_ROOT_ID`   | Yes      | Confluence page ID to start tree walk from                     |
+| `--output-dir`        | `OUTPUT_DIR`           | No       | Output directory (default: `./output`)                         |
+| `--force`             | `CONFLUENCE_FORCE_PULL` | No      | Bypass incremental cache and re-pull all pages (default: off)  |
+
+### Incremental Sync (Caching)
+
+By default the pull tool uses **incremental sync** to avoid re-downloading unchanged content.
+
+On each pull, the tool writes a `.pull-manifest.json` file to the output directory. This manifest
+records every page's Confluence **version number**, title, output path, and attachment list.
+On subsequent runs the tool compares each page's current version against the cached version and
+**skips pages whose version has not changed**, saving API calls, bandwidth, and conversion time.
+
+**How it works:**
+
+1. The full page tree is always walked (cheap — no body content fetched).
+2. For each page, the version number from the API is compared to the manifest entry.
+3. Pages with an increased version number (or a changed title) are re-fetched and re-converted.
+4. New pages (not in the manifest) are fetched normally.
+5. Pages that were in the old manifest but are no longer in the tree are deleted from the output.
+6. Attachment downloads are also cached — existing image files on disk are skipped.
+
+**Forcing a full pull:**
+
+To bypass the cache entirely and re-pull all pages, use the `--force` flag:
+
+```bash
+node lib/pull/index.js --output-dir ./output --force
+```
+
+Or set the environment variable:
+
+```bash
+export CONFLUENCE_FORCE_PULL=true
+node lib/pull/index.js --output-dir ./output
+```
+
+**When to use `--force`:**
+
+- After upgrading the pull tool (conversion logic may have changed)
+- If you suspect the manifest is stale or corrupted
+- When you want a clean, guaranteed-fresh output
+- In CI environments where the output directory is always empty anyway
+
+**Manifest location:** `<output-dir>/.pull-manifest.json`
+
+The manifest is a plain JSON file and can be safely committed to version control or added to
+`.gitignore` depending on your workflow. Deleting it is equivalent to running with `--force` on
+the next pull.
+
 ## Requirements
 
 In order to use this action to your repository you need to meet the following requirements.
