@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Get Page Body — Confluence v2 API",
+  "description": "Contract for GET /wiki/api/v2/pages/{id}?body-format=atlas_doc_format",
+  "request": {
+    "method": "GET",
+    "path": "/wiki/api/v2/pages/{id}",
+    "pathParameters": {
+      "id": {
+        "type": "string",
+        "description": "Confluence page ID (numeric string)",
+        "example": "2134835234"
+      }
+    },
+    "queryParameters": {
+      "body-format": {
+        "type": "string",
+        "enum": ["atlas_doc_format"],
+        "required": true,
+        "description": "Request ADF body format"
+      }
+    },
+    "headers": {
+      "Authorization": {
+        "type": "string",
+        "pattern": "^Basic .+$",
+        "description": "Basic auth: base64(email:apiToken)"
+      },
+      "Accept": {
+        "type": "string",
+        "const": "application/json"
+      }
+    }
+  },
+  "response": {
+    "200": {
+      "type": "object",
+      "required": ["id", "status", "title", "body", "_links"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Page ID"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["current", "draft", "archived"]
+        },
+        "title": {
+          "type": "string",
+          "description": "Page title"
+        },
+        "spaceId": {
+          "type": "string",
+          "description": "Space ID the page belongs to"
+        },
+        "parentId": {
+          "type": "string",
+          "description": "Parent page ID (null for space root)"
+        },
+        "parentType": {
+          "type": "string",
+          "enum": ["page", "space"]
+        },
+        "position": {
+          "type": "integer",
+          "description": "Position among siblings"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "number": { "type": "integer" },
+            "message": { "type": "string" },
+            "minorEdit": { "type": "boolean" },
+            "createdAt": { "type": "string", "format": "date-time" }
+          }
+        },
+        "body": {
+          "type": "object",
+          "required": ["atlas_doc_format"],
+          "properties": {
+            "atlas_doc_format": {
+              "type": "object",
+              "required": ["value", "representation"],
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "ADF document as a JSON string — must be JSON.parse()'d"
+                },
+                "representation": {
+                  "type": "string",
+                  "const": "atlas_doc_format"
+                }
+              }
+            }
+          }
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "base": {
+              "type": "string",
+              "description": "Base URL for constructing full URLs",
+              "example": "https://leolabs.atlassian.net/wiki"
+            }
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Authentication failed — invalid email or API token"
+    },
+    "404": {
+      "description": "Page not found — invalid page ID"
+    }
+  }
+}

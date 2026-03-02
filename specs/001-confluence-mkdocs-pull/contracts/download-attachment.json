@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Download Attachment — Confluence REST API",
+  "description": "Contract for binary attachment download via GET {base}{downloadLink}",
+  "request": {
+    "method": "GET",
+    "path": "{_links.base}{downloadLink}",
+    "pathDescription": "Full URL constructed from the base link and the attachment's downloadLink field. Example: https://leolabs.atlassian.net/wiki/rest/api/content/att123456/download",
+    "headers": {
+      "Authorization": {
+        "type": "string",
+        "pattern": "^Basic .+$",
+        "description": "Basic auth: base64(email:apiToken)"
+      }
+    },
+    "responseType": "stream"
+  },
+  "response": {
+    "200": {
+      "description": "Binary stream of the attachment file",
+      "contentType": "application/octet-stream or original mediaType",
+      "headers": {
+        "Content-Type": {
+          "type": "string",
+          "description": "Original MIME type of the attachment"
+        },
+        "Content-Length": {
+          "type": "integer",
+          "description": "File size in bytes"
+        },
+        "Content-Disposition": {
+          "type": "string",
+          "description": "Suggested filename for download"
+        }
+      },
+      "body": "Binary stream — pipe to fs.createWriteStream(destPath)"
+    },
+    "401": {
+      "description": "Authentication failed"
+    },
+    "404": {
+      "description": "Attachment not found or no longer exists"
+    }
+  },
+  "implementationNotes": {
+    "axiosConfig": {
+      "responseType": "stream",
+      "description": "Must use responseType 'stream' to avoid loading entire file into memory"
+    },
+    "downloadPattern": "Use response.data.pipe(fs.createWriteStream(destPath)) — same pattern as base-sdk.js toPng()",
+    "retryPolicy": "Uses existing retry-policy.js (3 retries, exponential backoff)"
+  }
+}

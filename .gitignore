@@ -47,3 +47,9 @@ typings/
 .env
 .env.test
 !test/fixtures/.env.test
+
+# IDE
+.vscode/
+
+# Pull tool output
+output/

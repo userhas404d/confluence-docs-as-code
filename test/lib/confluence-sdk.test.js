@@ -1,5 +1,6 @@
 import qs from 'node:querystring';
 import path from 'node:path';
+import { expect } from 'chai';
 import nock from 'nock';
 import sinon from 'sinon';
 import ConfluenceSdk from '../../lib/confluence-sdk.js';
@@ -521,6 +522,145 @@ describe('confluence-sdk', () => {
                 requestMock.reply(200);
                 return sdk.createAttachment(pageId, notExistentFile).should.be.rejectedWith(error);
             });
+        });
+    });
+
+    // ── Pull Direction SDK Methods (v2 API) ──────────────────────────
+
+    describe('getPageBody', () => {
+        const pageId = '2134835234';
+        let requestMock;
+
+        beforeEach(() => {
+            requestMock = nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}?body-format=atlas_doc_format`);
+        });
+
+        it('should return page object with ADF body on success', async () => {
+            const responseBody = {
+                id: pageId,
+                status: 'current',
+                title: 'Test Page',
+                body: {
+                    atlas_doc_format: {
+                        value: '{"version":1,"type":"doc","content":[]}',
+                        representation: 'atlas_doc_format'
+                    }
+                },
+                _links: { base: 'https://tenant.atlassian.net/wiki' }
+            };
+            requestMock.reply(200, responseBody);
+
+            const result = await sdk.getPageBody(pageId);
+            expect(result).to.deep.equal(responseBody);
+        });
+
+        it('should throw RequestError on 404', async () => {
+            requestMock.reply(404, { message: 'Page not found' });
+            return sdk.getPageBody(pageId).should.be.rejectedWith(RequestError);
+        });
+
+        it('should throw RequestError on 401', async () => {
+            requestMock.reply(401, { message: 'Unauthorized' });
+            return sdk.getPageBody(pageId).should.be.rejectedWith(RequestError);
+        });
+    });
+
+    describe('getPageChildren', () => {
+        const pageId = '2134835234';
+
+        it('should return filtered page-type children', async () => {
+            const responseBody = {
+                results: [
+                    { id: '111', title: 'Child Page', type: 'page', childPosition: 0 },
+                    { id: '222', title: 'A Whiteboard', type: 'whiteboard', childPosition: 1 },
+                    { id: '333', title: 'Another Page', type: 'page', childPosition: 2 }
+                ],
+                _links: {}
+            };
+            nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}/direct-children?sort=child-position`)
+                .reply(200, responseBody);
+
+            const result = await sdk.getPageChildren(pageId);
+            expect(result).to.have.lengthOf(2);
+            expect(result[0].id).to.equal('111');
+            expect(result[1].id).to.equal('333');
+        });
+
+        it('should paginate when _links.next is present', async () => {
+            nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}/direct-children?sort=child-position`)
+                .reply(200, {
+                    results: [{ id: '111', title: 'Page 1', type: 'page', childPosition: 0 }],
+                    _links: { next: `/wiki/api/v2/pages/${pageId}/direct-children?cursor=abc123` }
+                });
+
+            nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}/direct-children?cursor=abc123`)
+                .reply(200, {
+                    results: [{ id: '222', title: 'Page 2', type: 'page', childPosition: 1 }],
+                    _links: {}
+                });
+
+            const result = await sdk.getPageChildren(pageId);
+            expect(result).to.have.lengthOf(2);
+            expect(result[0].id).to.equal('111');
+            expect(result[1].id).to.equal('222');
+        });
+
+        it('should throw RequestError on 404', async () => {
+            nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}/direct-children?sort=child-position`)
+                .reply(404, { message: 'Not found' });
+
+            return sdk.getPageChildren(pageId).should.be.rejectedWith(RequestError);
+        });
+    });
+
+    describe('getAttachments', () => {
+        const pageId = '2134835234';
+
+        it('should return attachments for a page', async () => {
+            const responseBody = {
+                results: [
+                    {
+                        id: 'att123',
+                        title: 'screenshot.png',
+                        mediaType: 'image/png',
+                        fileId: 'abc-def',
+                        downloadLink: '/wiki/rest/api/content/att123/download'
+                    }
+                ],
+                _links: {}
+            };
+
+            nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}/attachments`)
+                .reply(200, responseBody);
+
+            const result = await sdk.getAttachments(pageId);
+            expect(result).to.have.lengthOf(1);
+            expect(result[0].title).to.equal('screenshot.png');
+        });
+
+        it('should paginate attachments', async () => {
+            nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}/attachments`)
+                .reply(200, {
+                    results: [{ id: 'att1', title: 'img1.png', mediaType: 'image/png' }],
+                    _links: { next: `/wiki/api/v2/pages/${pageId}/attachments?cursor=xyz` }
+                });
+
+            nock(sdkOpts.host, { reqheaders: requestHeaders })
+                .get(`/wiki/api/v2/pages/${pageId}/attachments?cursor=xyz`)
+                .reply(200, {
+                    results: [{ id: 'att2', title: 'img2.png', mediaType: 'image/png' }],
+                    _links: {}
+                });
+
+            const result = await sdk.getAttachments(pageId);
+            expect(result).to.have.lengthOf(2);
         });
     });
 });

@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Get Page Attachments — Confluence v2 API",
+  "description": "Contract for GET /wiki/api/v2/pages/{id}/attachments",
+  "request": {
+    "method": "GET",
+    "path": "/wiki/api/v2/pages/{id}/attachments",
+    "pathParameters": {
+      "id": {
+        "type": "string",
+        "description": "Confluence page ID (numeric string)",
+        "example": "2134835234"
+      }
+    },
+    "queryParameters": {
+      "limit": {
+        "type": "integer",
+        "default": 25,
+        "maximum": 250,
+        "description": "Maximum results per page"
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor from _links.next"
+      },
+      "sort": {
+        "type": "string",
+        "enum": ["created-date", "-created-date", "-modified-date", "modified-date"],
+        "description": "Sort order"
+      },
+      "mediaType": {
+        "type": "string",
+        "description": "Filter by MIME type (e.g., image/png)"
+      },
+      "filename": {
+        "type": "string",
+        "description": "Filter by exact filename"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["current", "archived"],
+        "description": "Filter by attachment status"
+      }
+    },
+    "headers": {
+      "Authorization": {
+        "type": "string",
+        "pattern": "^Basic .+$",
+        "description": "Basic auth: base64(email:apiToken)"
+      },
+      "Accept": {
+        "type": "string",
+        "const": "application/json"
+      }
+    }
+  },
+  "response": {
+    "200": {
+      "type": "object",
+      "required": ["results", "_links"],
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "status", "title", "mediaType", "downloadLink"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Attachment ID (prefixed with 'att')"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["current", "archived"]
+              },
+              "title": {
+                "type": "string",
+                "description": "Filename (e.g., 'screenshot.png')"
+              },
+              "mediaType": {
+                "type": "string",
+                "description": "MIME type (e.g., 'image/png')"
+              },
+              "mediaTypeDescription": {
+                "type": "string",
+                "description": "Human-readable media type (e.g., 'PNG Image')"
+              },
+              "comment": {
+                "type": "string",
+                "description": "Attachment comment/description"
+              },
+              "fileId": {
+                "type": "string",
+                "description": "Internal file ID — used in ADF media nodes for matching"
+              },
+              "fileSize": {
+                "type": "integer",
+                "description": "File size in bytes"
+              },
+              "downloadLink": {
+                "type": "string",
+                "description": "Relative download URL (combine with _links.base)",
+                "example": "/wiki/rest/api/content/att123456/download"
+              },
+              "pageId": {
+                "type": "string",
+                "description": "ID of the page this attachment belongs to"
+              },
+              "version": {
+                "type": "object",
+                "properties": {
+                  "number": { "type": "integer" },
+                  "createdAt": { "type": "string", "format": "date-time" }
+                }
+              },
+              "_links": {
+                "type": "object",
+                "properties": {
+                  "download": {
+                    "type": "string",
+                    "description": "Alternative download path"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "next": {
+              "type": "string",
+              "description": "Relative URL for next page of results"
+            },
+            "base": {
+              "type": "string",
+              "description": "Base URL for constructing full download URLs"
+            }
+          }
+        }
+      }
+    },
+    "400": {
+      "description": "Bad request — invalid parameters"
+    },
+    "401": {
+      "description": "Authentication failed"
+    }
+  }
+}

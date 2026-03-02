@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Get Page Children — Confluence v2 API",
+  "description": "Contract for GET /wiki/api/v2/pages/{id}/direct-children",
+  "request": {
+    "method": "GET",
+    "path": "/wiki/api/v2/pages/{id}/direct-children",
+    "pathParameters": {
+      "id": {
+        "type": "string",
+        "description": "Confluence page ID (numeric string)",
+        "example": "2134835234"
+      }
+    },
+    "queryParameters": {
+      "limit": {
+        "type": "integer",
+        "default": 25,
+        "maximum": 250,
+        "description": "Maximum results per page"
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor from _links.next"
+      },
+      "sort": {
+        "type": "string",
+        "enum": ["child-position", "-child-position", "created-date", "-created-date"],
+        "default": "child-position",
+        "description": "Sort order for children"
+      }
+    },
+    "headers": {
+      "Authorization": {
+        "type": "string",
+        "pattern": "^Basic .+$",
+        "description": "Basic auth: base64(email:apiToken)"
+      },
+      "Accept": {
+        "type": "string",
+        "const": "application/json"
+      }
+    }
+  },
+  "response": {
+    "200": {
+      "type": "object",
+      "required": ["results", "_links"],
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "status", "title", "type"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Child content ID"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["current", "draft", "archived"]
+              },
+              "title": {
+                "type": "string",
+                "description": "Child content title"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["page", "whiteboard", "database", "folder", "embed"],
+                "description": "Content type — filter to 'page' for pull tool"
+              },
+              "spaceId": {
+                "type": "string",
+                "description": "Space ID"
+              },
+              "childPosition": {
+                "type": "integer",
+                "description": "Position among siblings (for ordering)"
+              }
+            }
+          }
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "next": {
+              "type": "string",
+              "description": "Relative URL for next page of results (absent if no more pages)"
+            },
+            "base": {
+              "type": "string",
+              "description": "Base URL for constructing full URLs"
+            }
+          }
+        }
+      }
+    },
+    "400": {
+      "description": "Bad request — invalid parameters"
+    },
+    "401": {
+      "description": "Authentication failed"
+    },
+    "404": {
+      "description": "Parent page not found"
+    }
+  }
+}
