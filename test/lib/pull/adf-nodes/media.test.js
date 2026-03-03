@@ -137,4 +137,45 @@ describe('adf-nodes/media', () => {
             expect(result).to.not.include('../');
         });
     });
+
+    describe('URL-encoding of spaces in filenames', () => {
+        it('should URL-encode spaces in image path segments', () => {
+            const ctx = {
+                depth: 0,
+                currentOutputPath: 'teleport-and-aws/index.md',
+                attachmentMap: new Map([
+                    ['file-sp', 'images/teleport-and-aws-Screenshot 2024-05-13 at 1.59.23 PM.png']
+                ])
+            };
+            const node = {
+                type: 'mediaSingle',
+                content: [{
+                    type: 'media',
+                    attrs: { type: 'file', id: 'file-sp', collection: '' }
+                }]
+            };
+            const result = convertNode(node, ctx);
+            expect(result).to.include('(../images/teleport-and-aws-Screenshot%202024-05-13%20at%201.59.23%20PM.png)');
+            // Alt text preserves spaces, but the path is URL-encoded
+            expect(result).to.match(/\]\(([^)]+)\)/);
+            const pathMatch = result.match(/\]\(([^)]+)\)/);
+            expect(pathMatch[1]).to.not.include(' ');
+        });
+
+        it('should not double-encode already safe characters', () => {
+            const ctx = {
+                depth: 0,
+                attachmentMap: new Map([['file-ok', 'images/simple-name.png']])
+            };
+            const node = {
+                type: 'mediaSingle',
+                content: [{
+                    type: 'media',
+                    attrs: { type: 'file', id: 'file-ok', collection: '' }
+                }]
+            };
+            const result = convertNode(node, ctx);
+            expect(result).to.include('(images/simple-name.png)');
+        });
+    });
 });
