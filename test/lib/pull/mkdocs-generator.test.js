@@ -71,7 +71,7 @@ describe('mkdocs-generator', () => {
         expect(yml).to.include('Home: index.md');
         expect(yml).to.include('Getting Started: getting-started.md');
         expect(yml).to.include('Architecture');
-        expect(yml).to.include('Overview: architecture/index.md');
+        expect(yml).to.include('Architecture: architecture/index.md');
         expect(yml).to.include('System Design: architecture/system-design.md');
         expect(yml).to.include('Data Flow: architecture/data-flow.md');
     });
