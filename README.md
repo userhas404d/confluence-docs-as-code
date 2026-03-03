@@ -44,14 +44,14 @@ mkdocs serve
 
 ### CLI Options
 
-| Flag                  | Env Var                | Required | Description                                                    |
-|-----------------------|------------------------|----------|----------------------------------------------------------------|
-| `--confluence-url`    | `CONFLUENCE_URL`       | Yes      | Base URL (e.g., `https://tenant.atlassian.net`)                |
-| `--confluence-user`   | `CONFLUENCE_USER`      | Yes      | Confluence user email for Basic auth                           |
-| `--confluence-token`  | `CONFLUENCE_TOKEN`     | Yes      | Confluence API token                                           |
-| `--root-page-id`      | `CONFLUENCE_ROOT_ID`   | Yes      | Confluence page ID to start tree walk from                     |
-| `--output-dir`        | `OUTPUT_DIR`           | No       | Output directory (default: `./output`)                         |
-| `--force`             | `CONFLUENCE_FORCE_PULL` | No      | Bypass incremental cache and re-pull all pages (default: off)  |
+| Flag                 | Env Var                 | Required | Description                                                   |
+| -------------------- | ----------------------- | -------- | ------------------------------------------------------------- |
+| `--confluence-url`   | `CONFLUENCE_URL`        | Yes      | Base URL (e.g., `https://tenant.atlassian.net`)               |
+| `--confluence-user`  | `CONFLUENCE_USER`       | Yes      | Confluence user email for Basic auth                          |
+| `--confluence-token` | `CONFLUENCE_TOKEN`      | Yes      | Confluence API token                                          |
+| `--root-page-id`     | `CONFLUENCE_ROOT_ID`    | Yes      | Confluence page ID to start tree walk from                    |
+| `--output-dir`       | `OUTPUT_DIR`            | No       | Output directory (default: `./output`)                        |
+| `--force`            | `CONFLUENCE_FORCE_PULL` | No       | Bypass incremental cache and re-pull all pages (default: off) |
 
 ### Incremental Sync (Caching)
 
@@ -98,6 +98,65 @@ node lib/pull/index.js --output-dir ./output
 The manifest is a plain JSON file and can be safely committed to version control or added to
 `.gitignore` depending on your workflow. Deleting it is equivalent to running with `--force` on
 the next pull.
+
+## Push Mode (Local CLI)
+
+The push (publish) workflow normally runs as a GitHub Action. For **local testing and development**,
+a CLI entry point lets you sync an MkDocs site to Confluence from your terminal without GitHub Actions.
+
+### Quick Start
+
+```bash
+export CONFLUENCE_TENANT="leolabs"          # tenant name (NOT full URL)
+export CONFLUENCE_SPACE="TESTSPACE"
+export CONFLUENCE_USER="you@example.com"
+export CONFLUENCE_TOKEN="your-api-token"
+
+node lib/push/index.js \
+  --source-dir ./output \
+  --repo-url https://github.com/org/repo
+```
+
+### CLI Options
+
+| Flag                        | Env Var                   | Required | Description                                                      |
+| --------------------------- | ------------------------- | -------- | ---------------------------------------------------------------- |
+| `--confluence-tenant`       | `CONFLUENCE_TENANT`       | Yes      | Atlassian tenant name (e.g., `leolabs`)                          |
+| `--confluence-space`        | `CONFLUENCE_SPACE`        | Yes      | Confluence space key to publish into                             |
+| `--confluence-user`         | `CONFLUENCE_USER`         | Yes      | User email for Basic auth                                        |
+| `--confluence-token`        | `CONFLUENCE_TOKEN`        | Yes      | API token for Basic auth                                         |
+| `--source-dir`              | `PUSH_SOURCE_DIR`         | No       | Directory containing `mkdocs.yml` (default: `.`)                 |
+| `--repo-url`                | `PUSH_REPO_URL`           | No       | Repository URL; injected into `mkdocs.yml` if missing            |
+| `--confluence-parent-page`  | `CONFLUENCE_PARENT_PAGE`  | No       | Parent page title for nesting                                    |
+| `--confluence-title-prefix` | `CONFLUENCE_TITLE_PREFIX` | No       | Prefix prepended to all page titles                              |
+| `--force-update`            | `CONFLUENCE_FORCE_UPDATE` | No       | Force-update all pages (env var: `yes`/`no`)                     |
+| `--cleanup`                 | `CONFLUENCE_CLEANUP`      | No       | Delete all synced pages instead of syncing (env var: `yes`/`no`) |
+| `--kroki-enabled`           | `KROKI_ENABLED`           | No       | Enable Kroki graph rendering (`yes`/`no`, default: `no`)         |
+| `--kroki-host`              | `KROKI_HOST`              | No       | Custom Kroki host URL (default: `https://kroki.io`)              |
+| `--mermaid-renderer`        | `MERMAID_RENDERER`        | No       | Mermaid rendering strategy                                       |
+| `--plantuml-renderer`       | `PLANTUML_RENDERER`       | No       | PlantUML rendering strategy                                      |
+| `-h`, `--help`              |                           | No       | Show usage help                                                  |
+
+### How It Works
+
+The push CLI reuses the existing GitHub Action syncer by mapping CLI flags and environment variables
+to the `INPUT_*` environment variables that `@actions/core`'s `getInput()` reads. This avoids any
+refactoring of the existing push codebase. The flow is:
+
+1. Parse and validate configuration from CLI flags / env vars.
+2. Set `INPUT_*` env vars so the Action modules find them.
+3. Set `GITHUB_SHA` / `GITHUB_REF_NAME` from the local git state (or `local` as fallback).
+4. Ensure `mkdocs.yml` has a `repo_url` (required by the syncer). If missing, inject the value
+   from `--repo-url`.
+5. `chdir` into the source directory and dynamically import the existing `confluence-syncer.js`.
+6. Execute `sync()` (or `cleanup()` with `--cleanup`).
+
+### Tips
+
+- **Use a separate space for testing** so you don't overwrite production pages.
+- The `--confluence-parent-page` flag lets you nest the synced pages under an existing page.
+- The `--confluence-title-prefix` flag is useful for namespacing test pages
+  (e.g., `--confluence-title-prefix "TEST - "`).
 
 ## Requirements
 
