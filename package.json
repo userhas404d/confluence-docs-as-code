@@ -11,7 +11,7 @@
     "predocs:generate": " rm -rf ./docs",
     "docs:generate": "jsdoc --readme ./README.md -c jsdoc.json"
   },
-  "author": "Eleftherios Chetzakis <eleftherios@workable.com>",
+  "author": "LeoLabs",
   "license": "ISC",
   "engines": {
     "node": ">=20"
