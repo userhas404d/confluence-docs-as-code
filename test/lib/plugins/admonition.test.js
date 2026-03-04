@@ -137,6 +137,61 @@ describe('plugins/admonition', () => {
             expect(result).to.include('<ac:structured-macro ac:name="info">');
             expect(result).to.include('Some info.');
         });
+
+        it('should render nested !!! inside ??? with balanced macros', () => {
+            const input = [
+                '??? note "Outer collapsible"',
+                '    Some text.',
+                '    !!! note',
+                '        Nested content.',
+                '',
+                '## Next Section',
+                '',
+                '??? note "Second collapsible"',
+                '    More text.',
+                ''
+            ].join('\n');
+            const result = md.render(input);
+
+            // Both expand macros should be present
+            const expandCount = (result.match(/ac:name="expand"/g) || []).length;
+            expect(expandCount).to.equal(2);
+
+            // Total macros should be balanced (open count === close count)
+            const openCount = (result.match(/<ac:structured-macro/g) || []).length;
+            const closeCount = (result.match(/<\/ac:structured-macro>/g) || []).length;
+            expect(openCount).to.equal(closeCount, 'macro open/close tags should be balanced');
+
+            // The outer collapsible should close with double-close (expand + note)
+            // The inner !!! note should have its own single close
+            // The second collapsible should also close with double-close
+            expect(result).to.include('Nested content.');
+            expect(result).to.include('More text.');
+        });
+
+        it('should not let a collapsible with nested admonition gobble subsequent content', () => {
+            const input = [
+                '??? warning "First"',
+                '    Content A.',
+                '    !!! info',
+                '        Inner info.',
+                '',
+                'Standalone paragraph.',
+                '',
+                '??? tip "Second"',
+                '    Content B.',
+                ''
+            ].join('\n');
+            const result = md.render(input);
+
+            // The standalone paragraph should NOT be inside any macro
+            // Check that it appears after the first expand closes and before the second opens
+            const firstExpandClose = result.indexOf('</ac:structured-macro></ac:rich-text-body></ac:structured-macro>');
+            const standalonePara = result.indexOf('Standalone paragraph.');
+            const secondExpandOpen = result.lastIndexOf('<ac:structured-macro ac:name="expand">');
+            expect(firstExpandClose).to.be.lessThan(standalonePara);
+            expect(standalonePara).to.be.lessThan(secondExpandOpen);
+        });
     });
 
     describe('TYPE_MAP coverage', () => {
