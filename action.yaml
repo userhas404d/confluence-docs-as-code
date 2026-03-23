@@ -47,3 +47,8 @@ inputs:
   plantuml_renderer:
     description: 'The strategy to use for plantUml graphs. Can be one of "none", "kroki" or "plantuml"'
     required: false
+outputs:
+  page_mapping:
+    description: 'JSON array of {pageId, pagePath, title} for all synced pages. Use as input to comment-sync action.'
+  page_mapping_file:
+    description: 'Path to page-mapping.json file written during sync.'
