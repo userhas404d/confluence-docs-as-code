@@ -51,13 +51,17 @@ describe('comment-sync/confluence-to-github', () => {
             confluenceSdk,
             githubClient,
             mapping,
-            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }]
+            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }],
+            confluenceHost: 'https://acme.atlassian.net',
+            spaceKey: 'ENG'
         });
 
         expect(stats.created).to.equal(1);
         expect(githubClient.addComment.calledOnce).to.be.true;
         const body = githubClient.addComment.firstCall.args[1];
         expect(body).to.include('confluence-comment-id:100');
+        expect(body).to.include('Synced from Confluence');
+        expect(body).to.include('https://acme.atlassian.net/wiki/spaces/ENG/pages/12345?focusedCommentId=100');
     });
 
     it('should skip comments that originated from GitHub', async () => {
@@ -74,7 +78,9 @@ describe('comment-sync/confluence-to-github', () => {
             confluenceSdk,
             githubClient,
             mapping,
-            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }]
+            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }],
+            confluenceHost: 'https://acme.atlassian.net',
+            spaceKey: 'ENG'
         });
 
         expect(stats.created).to.equal(0);
@@ -103,11 +109,16 @@ describe('comment-sync/confluence-to-github', () => {
             confluenceSdk,
             githubClient,
             mapping,
-            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }]
+            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }],
+            confluenceHost: 'https://acme.atlassian.net',
+            spaceKey: 'ENG'
         });
 
         expect(stats.updated).to.equal(1);
         expect(githubClient.updateComment.calledOnce).to.be.true;
+        const body = githubClient.updateComment.firstCall.args[1];
+        expect(body).to.include('Synced from Confluence');
+        expect(body).to.include('View original comment');
     });
 
     it('should skip unchanged comments', async () => {
@@ -138,7 +149,9 @@ describe('comment-sync/confluence-to-github', () => {
             confluenceSdk,
             githubClient,
             mapping,
-            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }]
+            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }],
+            confluenceHost: 'https://acme.atlassian.net',
+            spaceKey: 'ENG'
         });
 
         expect(stats.created).to.equal(0);
@@ -161,7 +174,9 @@ describe('comment-sync/confluence-to-github', () => {
             confluenceSdk,
             githubClient,
             mapping,
-            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }]
+            pages: [{ pageId: 12345, pagePath: 'docs/test-page' }],
+            confluenceHost: 'https://acme.atlassian.net',
+            spaceKey: 'ENG'
         });
 
         expect(stats.deleted).to.equal(1);

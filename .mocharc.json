@@ -1,5 +1,6 @@
 {
     "recursive": true,
+    "spec": "test/lib/**/*.test.js",
     "file": "test/index.js",
     "node-option": ["loader=esmock"]
 }
