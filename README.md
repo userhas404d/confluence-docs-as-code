@@ -22,6 +22,15 @@ Atlassian Confluence Cloud wiki.
 
 * Does not publish pages not described in the `nav` section.
 
+### Comment Sync Limitations
+
+> [!NOTE]
+> **Emoji reactions are not synced.** The Confluence REST API (v1 and v2) does not
+> expose emoji reactions on comments — only simple likes via `metadata.likes`. Since
+> there is no public API to read or write the full set of emoji reactions visible in
+> the Confluence editor, reaction sync is not supported. Comment text, resolution
+> status, and deletion tracking are fully supported.
+
 ## Requirements
 
 In order to use this action to your repository you need to meet the following requirements.
@@ -46,6 +55,23 @@ nav:
 ```
 
 For more MkDocs configuration options check out the official [documentation](https://www.mkdocs.org/user-guide/configuration).
+
+> [!TIP]
+> If you use the **comment-sync** feature with [Giscus](https://giscus.app), your
+> MkDocs site should use [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
+> with its built-in [comments integration](https://squidfunk.github.io/mkdocs-material/setup/adding-a-comment-system/).
+> Add the following to your `mkdocs.yml`:
+>
+> ```yml
+> theme:
+>   name: material
+>
+> plugins:
+>   - search
+> ```
+>
+> Then enable comments on individual pages by adding `comments: true` to the page
+> front matter, or site-wide via the `meta` plugin.
 
 ### Atlassian Confluence
 
