@@ -7,6 +7,8 @@
     "posttest": "eslint ./lib/**/*.js",
     "test": "c8 mocha",
     "build": "ncc build lib/index.js --license licenses.txt --minify --source-map",
+    "build:comment-sync": "ncc build lib/comment-sync/index.js -o comment-sync/dist --license licenses.txt --minify --source-map",
+    "build:all": "npm run build && npm run build:comment-sync",
     "prepare": "husky",
     "predocs:generate": " rm -rf ./docs",
     "docs:generate": "jsdoc --readme ./README.md -c jsdoc.json"
@@ -22,11 +24,13 @@
   },
   "dependencies": {
     "@actions/core": "^3.0.0",
+    "@actions/github": "^9.0.0",
     "axios": "^1.6.0",
     "axios-retry": "^4.5.0",
     "form-data": "^4.0.0",
     "markdown-it": "^14.1.1",
     "plantuml-encoder": "^1.4.0",
+    "turndown": "^7.2.2",
     "yaml": "^2.2.2"
   },
   "devDependencies": {

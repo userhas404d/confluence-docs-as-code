@@ -1,0 +1,54 @@
+name: 'Comment Sync: Confluence ↔ GitHub Discussions'
+description: 'Bidirectional sync of comments between Confluence pages and GitHub Discussions (Giscus-compatible)'
+branding:
+  icon: 'message-circle'
+  color: 'blue'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+inputs:
+  mode:
+    description: 'Sync mode: "poll" for scheduled bidirectional sync, "event" for webhook-triggered single comment sync'
+    required: false
+    default: 'poll'
+  confluence_tenant:
+    description: 'Your Atlassian tenant name'
+    required: true
+  confluence_space:
+    description: 'The key of the space hosting your documentation'
+    required: true
+  confluence_user:
+    description: 'The username used to authenticate with Confluence REST API'
+    required: true
+  confluence_token:
+    description: 'The token used to authenticate with Confluence REST API'
+    required: true
+  github_token:
+    description: 'GitHub token with repo and discussions scope'
+    required: true
+  discussion_category:
+    description: 'Name of the GitHub Discussions category (must match Giscus config)'
+    required: true
+  page_mapping:
+    description: |
+      Mapping of Confluence page IDs to page paths (Discussion titles).
+      Format: "pageId:pagePath" — one per line or comma-separated.
+      Example:
+        12345:docs/getting-started
+        67890:docs/api-reference
+    required: true
+  resolved_label:
+    description: 'GitHub label to apply when a Confluence comment is resolved'
+    required: false
+    default: 'resolved'
+  deleted_label:
+    description: 'GitHub label to apply when a Confluence comment is deleted'
+    required: false
+    default: 'deleted-on-confluence'
+outputs:
+  confluence_to_github:
+    description: 'JSON stats from Confluence → GitHub sync (poll mode only)'
+  github_to_confluence:
+    description: 'JSON stats from GitHub → Confluence sync (poll mode only)'
+  sync_result:
+    description: 'JSON result from single comment sync (event mode only)'
